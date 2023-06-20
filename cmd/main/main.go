@@ -1,45 +1,16 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/buger/jsonparser"
+	mmap2 "github.com/edsrzf/mmap-go"
 	"log"
+	"os"
 	"sync"
 )
 
-func main() {
-	data := []byte(`[
-    {"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 10},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5},
-	{"product": "Печенье", "price": 34, "rating": 3},
-    {"product": "Сахар", "price": 45, "rating": 2},
-    {"product": "Варенье", "price": 200, "rating": 5}
-]`)
-
-	var maxPrice, maxRating int64
-	var maxPriceName, maxRatingName string
+func jsonParser(data []byte) (maxPrice, maxRating int64, maxPriceName, maxRatingName string) {
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
@@ -92,8 +63,35 @@ func main() {
 	}()
 
 	wg.Wait()
+	return maxPrice, maxRating, maxPriceName, maxRatingName
+}
 
-	fmt.Println("Самый дорогой продукт: ", maxPriceName, " с ценой: ", maxPrice)
-	fmt.Println("Продукт с самым высоким рейтингом: ", maxRatingName, " с рейтингом: ", maxRating)
+func main() {
+
+	//Чтение флага
+	var filename string
+	flag.StringVar(&filename, "filename", "", "enter your file name")
+
+	flag.Parse()
+
+	fmt.Println("parsed flag: ", filename)
+
+	if filename == "" {
+		fmt.Println("Пожалуйста, введите название файла с ключом -filename")
+		return
+	}
+
+	f, _ := os.OpenFile(filename, os.O_RDWR, 0644)
+	defer f.Close()
+
+	mmap, _ := mmap2.Map(f, mmap2.RDWR, 0)
+	defer mmap.Unmap()
+
+	if filename[len(filename)-5:] == ".json" {
+		maxPrice, maxRating, maxPriceName, maxRatingName := jsonParser(mmap)
+
+		fmt.Println("Самый дорогой продукт: ", maxPriceName, " с ценой: ", maxPrice)
+		fmt.Println("Продукт с самым высоким рейтингом: ", maxRatingName, " с рейтингом: ", maxRating)
+	}
 
 }
