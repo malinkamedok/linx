@@ -144,10 +144,10 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println("parsed flag: ", filename)
+	//fmt.Println("parsed flag: ", filename)
 
 	if filename == "" {
-		fmt.Println("Пожалуйста, введите название файла с ключом -filename")
+		fmt.Println("Пожалуйста, введите название файла с ключом --filename")
 		return
 	}
 
