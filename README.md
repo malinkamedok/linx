@@ -1,5 +1,5 @@
 Build status:
-![Status](https://github.com/malinkamedok/linx/actions/workflows/ci.yml/badge.svg)
+![Status](https://github.com/malinkamedok/linx/actions/workflows/ci.yaml/badge.svg)
 
 docker build -t linx:latest .
 
